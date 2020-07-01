@@ -16,7 +16,6 @@ namespace TheDevTrack.ObjectToCsv.Test.Entities
         public int Id { get; set; }
         [ColumnAttribute("License plate")]
         public string LicensePlate { get; set; }
-        public string teste { get; set; } = "wasdasdad";
         [ColumnAttribute("Color")]
         public string Color { get; set; }
         [ColumnAttribute("Year")]
