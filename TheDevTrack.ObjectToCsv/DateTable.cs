@@ -71,7 +71,7 @@ namespace TheDevTrack.ObjectToCsv
 
         private PropertyInfo[] GetCsvFields() => typeof(T)
                                                 .GetProperties()
-                                                .Where(x => x.CustomAttributes.Any())
+                                                .Where(x => x.CustomAttributes.Any(y => y.AttributeType.Equals(typeof(ColumnAttribute))))
                                                 .ToArray();
 
         private PropertyInfo GetColumnPropertyInfo(T row, PropertyInfo field) => row.GetType().GetProperty(field.Name);
