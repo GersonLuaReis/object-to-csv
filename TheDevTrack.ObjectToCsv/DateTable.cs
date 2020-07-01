@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -52,7 +53,7 @@ namespace TheDevTrack.ObjectToCsv
                 var columns = GetCsvFields();
 
                 foreach (var field in columns)
-                    csvWriter.WriteField(field.GetCustomAttribute<ColumnAttribute>().Name);
+                    csvWriter.WriteField(field.GetCustomAttribute<ColumnAttribute>()?.Name);
 
                 csvWriter.NextRecord();
 
@@ -68,9 +69,13 @@ namespace TheDevTrack.ObjectToCsv
             }
         }
 
-        private PropertyInfo[] GetCsvFields() => this.Rows[0].GetType().GetProperties();
+        private PropertyInfo[] GetCsvFields() => typeof(T)
+                                                .GetProperties()
+                                                .Where(x => x.CustomAttributes.Any())
+                                                .ToArray();
 
         private PropertyInfo GetColumnPropertyInfo(T row, PropertyInfo field) => row.GetType().GetProperty(field.Name);
+
 
         /// <summary>
         /// The csv byte array is created based on [Column("name")] atrributtes
