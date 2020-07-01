@@ -12,13 +12,13 @@ namespace TheDevTrack.ObjectToCsv.Test.Entities
             Year = year;
         }
 
-        [ColumnAttribute("Car code")]
+        [Column("Car code")]
         public int Id { get; set; }
-        [ColumnAttribute("License plate")]
+        [Column("License plate")]
         public string LicensePlate { get; set; }
-        [ColumnAttribute("Color")]
+        [Column("Color")]
         public string Color { get; set; }
-        [ColumnAttribute("Year")]
+        [Column("Year")]
         public short Year { get; set; }
     }
 }
