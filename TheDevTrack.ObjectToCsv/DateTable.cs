@@ -14,11 +14,10 @@ namespace TheDevTrack.ObjectToCsv
     {
         public DateTable(T[] rows)
         {
-            Columns = typeof(T).GetProperties().Length;
             Rows = rows;
         }
-        public int Columns { get; private set; }
-        public T[] Rows { get; private set; }
+
+        public T[] Rows { get; set; }
 
         CsvConfiguration csvConfiguration;
         public CsvConfiguration CsvConfiguration
@@ -41,6 +40,12 @@ namespace TheDevTrack.ObjectToCsv
         }
 
         /// <summary>
+        /// The csv byte array is created based on [Column("name")] atrributtes
+        /// </summary>
+        /// <returns></returns>
+        public byte[] ToByteArrayCsv() => Encoding.ASCII.GetBytes(ToStringCsv());
+
+        /// <summary>
         /// The csv is created based on [Column("name")] atrributtes
         /// </summary>
         /// <returns></returns>
@@ -52,15 +57,15 @@ namespace TheDevTrack.ObjectToCsv
             {
                 var columns = GetCsvFields();
 
-                foreach (var field in columns)
-                    csvWriter.WriteField(field.GetCustomAttribute<ColumnAttribute>()?.Name);
+                for (int i = 0; i < columns.Length; i++)
+                    csvWriter.WriteField(columns[i].GetCustomAttribute<ColumnAttribute>()?.Name);
 
                 csvWriter.NextRecord();
 
-                foreach (var row in this.Rows)
+                for (int i = 0; i < Rows.Length; i++)
                 {
-                    foreach (var field in columns)
-                        csvWriter.WriteField(GetColumnPropertyInfo(row, field).GetValue(row));
+                    for (int x = 0; x < columns.Length; x++)
+                        csvWriter.WriteField(GetColumnPropertyInfo(Rows[i], columns[x]).GetValue(Rows[i]));
                     csvWriter.NextRecord();
                 }
 
@@ -75,12 +80,5 @@ namespace TheDevTrack.ObjectToCsv
                                                 .ToArray();
 
         private PropertyInfo GetColumnPropertyInfo(T row, PropertyInfo field) => row.GetType().GetProperty(field.Name);
-
-
-        /// <summary>
-        /// The csv byte array is created based on [Column("name")] atrributtes
-        /// </summary>
-        /// <returns></returns>
-        public byte[] ToByteArrayCsv() => Encoding.ASCII.GetBytes(ToStringCsv());
     }
 }
