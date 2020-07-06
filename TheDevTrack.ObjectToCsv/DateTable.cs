@@ -16,9 +16,13 @@ namespace TheDevTrack.ObjectToCsv
         public DateTable(T[] rows)
         {
             Rows = rows;
+            type = typeof(T);
+            Properties = type.GetProperties();
         }
 
-        public T[] Rows { get; set; }
+        public T[] Rows { get; private set; }
+        public Type type { get; private set; }
+        public PropertyInfo[] Properties { get; private set; }
 
         CsvConfiguration csvConfiguration;
         public CsvConfiguration CsvConfiguration
@@ -46,41 +50,48 @@ namespace TheDevTrack.ObjectToCsv
         /// <returns></returns>
         public byte[] ToByteArrayCsv() => Encoding.ASCII.GetBytes(ToStringCsv());
 
+        private const string nextLine = "\r\n";
+        private const string nextColumn = ";";
         /// <summary>
         /// The csv is created based on [Column("name")] atrributtes
         /// </summary>
         /// <returns></returns>
         public string ToStringCsv()
         {
-            using (var memoryStream = new MemoryStream())
-            using (var writer = new StreamWriter(memoryStream))
-            using (var csvWriter = new CsvWriter(writer, CsvConfiguration))
+            var csv = new StringBuilder();
+
+            var columns = GetCsvFields();
+
+            for (int i = 0; i < columns.Length; i++)
             {
-                var columns = GetCsvFields();
-
-                for (int i = 0; i < columns.Length; i++)
-                    csvWriter.WriteField(columns[i]);
-
-                csvWriter.NextRecord();
-
-                for (int i = 0; i < Rows.Length; i++)
-                {
-                    for (int x = 0; x < columns.Length; x++)
-                        csvWriter.WriteField(GetColumnPropertyInfo(Rows[i], columns[x]));
-                    csvWriter.NextRecord();
-                }
-
-                writer.Flush();
-                return Encoding.UTF8.GetString(memoryStream.ToArray());
+                csv.Append(columns[i].Item2);
+                csv.Append(nextColumn);
             }
+
+            csv.Append(nextLine);
+
+            for (int i = 0; i < Rows.Length; i++)
+            {
+                for (int x = 0; x < columns.Length; x++)
+                {
+                    csv.Append(GetValueFromRowAndColumn(Rows[i], columns[x].Item1));
+                    csv.Append(nextColumn);
+                }
+                csv.Append(nextLine);
+            }
+
+            return csv.ToString();
         }
 
-        private string[] GetCsvFields() => typeof(T)
-                                            .GetProperties()
-                                            .Where(x => x.CustomAttributes.Any(y => y.AttributeType.Equals(typeof(ColumnAttribute))))
-                                            .Select(x => x.Name)
-                                            .ToArray();
+        private Tuple<int, string>[] GetCsvFields()
+        {
+            return Properties
+                        .Where(x => x.CustomAttributes.Any(y => y.AttributeType.Equals(typeof(ColumnAttribute))))
+                        .Select(x => Tuple.Create(x.MetadataToken, x.GetCustomAttribute<ColumnAttribute>()?.Name))
+                        .ToArray();
+        }
 
-        private string GetColumnPropertyInfo(T row, string field) => (row.GetType().GetProperty(field)).GetValue(row).ToString();
+        private string GetValueFromRowAndColumn(T row, int columnId) => Properties.First(x => x.MetadataToken == columnId).GetValue(row).ToString();
+
     }
 }

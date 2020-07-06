@@ -20,5 +20,6 @@ namespace TheDevTrack.ObjectToCsv.Test.Entities
         public string Color { get; set; }
         [Column("Year")]
         public short Year { get; set; }
+        public string assss { get; set; } = "LALALALALALA";
     }
 }
