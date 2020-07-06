@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TheDevTrack.ObjectToCsv
 {
@@ -58,7 +59,7 @@ namespace TheDevTrack.ObjectToCsv
                 var columns = GetCsvFields();
 
                 for (int i = 0; i < columns.Length; i++)
-                    csvWriter.WriteField(columns[i].GetCustomAttribute<ColumnAttribute>()?.Name);
+                    csvWriter.WriteField(columns[i]);
 
                 csvWriter.NextRecord();
 
@@ -74,11 +75,12 @@ namespace TheDevTrack.ObjectToCsv
             }
         }
 
-        private PropertyInfo[] GetCsvFields() => typeof(T)
-                                                .GetProperties()
-                                                .Where(x => x.CustomAttributes.Any(y => y.AttributeType.Equals(typeof(ColumnAttribute))))
-                                                .ToArray();
+        private string[] GetCsvFields() => typeof(T)
+                                            .GetProperties()
+                                            .Where(x => x.CustomAttributes.Any(y => y.AttributeType.Equals(typeof(ColumnAttribute))))
+                                            .Select(x => x.Name)
+                                            .ToArray();
 
-        private PropertyInfo GetColumnPropertyInfo(T row, PropertyInfo field) => row.GetType().GetProperty(field.Name);
+        private PropertyInfo GetColumnPropertyInfo(T row, string field) => row.GetType().GetProperty(field);
     }
 }

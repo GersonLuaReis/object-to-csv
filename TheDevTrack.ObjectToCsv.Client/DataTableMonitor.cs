@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Order;
 
 namespace TheDevTrack.ObjectToCsv.Client
 {
