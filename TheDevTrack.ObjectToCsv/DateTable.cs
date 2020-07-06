@@ -66,7 +66,7 @@ namespace TheDevTrack.ObjectToCsv
                 for (int i = 0; i < Rows.Length; i++)
                 {
                     for (int x = 0; x < columns.Length; x++)
-                        csvWriter.WriteField(GetColumnPropertyInfo(Rows[i], columns[x]).GetValue(Rows[i]));
+                        csvWriter.WriteField(GetColumnPropertyInfo(Rows[i], columns[x]));
                     csvWriter.NextRecord();
                 }
 
@@ -81,6 +81,6 @@ namespace TheDevTrack.ObjectToCsv
                                             .Select(x => x.Name)
                                             .ToArray();
 
-        private PropertyInfo GetColumnPropertyInfo(T row, string field) => row.GetType().GetProperty(field);
+        private string GetColumnPropertyInfo(T row, string field) => (row.GetType().GetProperty(field)).GetValue(row).ToString();
     }
 }
