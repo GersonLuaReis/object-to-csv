@@ -1,13 +1,8 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace TheDevTrack.ObjectToCsv
 {
@@ -16,33 +11,11 @@ namespace TheDevTrack.ObjectToCsv
         public DateTable(T[] rows)
         {
             Rows = rows;
-            type = typeof(T);
-            Properties = type.GetProperties();
+            Properties = typeof(T).GetProperties();
         }
 
-        public T[] Rows { get; private set; }
-        public Type type { get; private set; }
-        public PropertyInfo[] Properties { get; private set; }
-
-        CsvConfiguration csvConfiguration;
-        public CsvConfiguration CsvConfiguration
-        {
-            get
-            {
-                if (csvConfiguration == null)
-                {
-                    CsvConfiguration = new CsvConfiguration(CultureInfo.CurrentCulture)
-                    {
-                        Delimiter = ";"
-                    };
-                }
-                return csvConfiguration;
-            }
-            set
-            {
-                csvConfiguration = value;
-            }
-        }
+        private readonly T[] Rows;
+        private readonly PropertyInfo[] Properties;
 
         /// <summary>
         /// The csv byte array is created based on [Column("name")] atrributtes
@@ -85,10 +58,12 @@ namespace TheDevTrack.ObjectToCsv
 
         private Tuple<int, string>[] GetCsvFields()
         {
-            return Properties
-                        .Where(x => x.CustomAttributes.Any(y => y.AttributeType.Equals(typeof(ColumnAttribute))))
-                        .Select(x => Tuple.Create(x.MetadataToken, x.GetCustomAttribute<ColumnAttribute>()?.Name))
-                        .ToArray();
+            Tuple<int, string>[] result = new Tuple<int, string>[Properties.Length - 1];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = Tuple.Create(Properties[i].MetadataToken, Properties[i].GetCustomAttribute<ColumnAttribute>().Name ?? Properties[i].Name);
+            }
+            return result;
         }
 
         private string GetValueFromRowAndColumn(T row, int columnId) => Properties.First(x => x.MetadataToken == columnId).GetValue(row).ToString();
