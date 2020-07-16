@@ -16,7 +16,7 @@ namespace TheDevTrack.ObjectToCsv.Client
             config.Add(Job.ShortRun.With(InProcessEmitToolchain.Instance));
             var summary = BenchmarkRunner.Run<DataTableMonitor>(config);
 
-            Console.ReadLine();
+            //Console.ReadLine();
         }
     }
 }

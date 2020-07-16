@@ -66,7 +66,14 @@ namespace TheDevTrack.ObjectToCsv
             return result;
         }
 
-        private string GetValueFromRowAndColumn(T row, int columnId) => Properties.First(x => x.MetadataToken == columnId).GetValue(row).ToString();
+        private string GetValueFromRowAndColumn(T row, int metadataToken)
+        {
 
+            for (int i = 0; i < Properties.Length; i++)
+                if (Properties[i].MetadataToken == metadataToken)
+                    return Properties[i].GetValue(row).ToString();
+
+            return "";
+        }
     }
 }
